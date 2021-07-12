@@ -26,7 +26,7 @@ router.post("/register", validateRoleName, (req, res, next) => {
 
   // never save the plain text password in the db
   user.password = hash
-  user.role_name = req.role_name // get the role_name from the req
+  user.role_name = req.role_name
 
   Users.add(user)
     .then(result => {

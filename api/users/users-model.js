@@ -21,7 +21,7 @@ function find() {
 
 
   return db("users as u")
-    .select("u.user_id", "u.username", "r.role_name as role")
+    .select("u.user_id", "u.username", "r.role_name")
     .leftJoin("roles as r", "u.role_id", "r.role_id")
 
 }

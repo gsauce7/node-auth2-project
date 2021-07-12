@@ -26,10 +26,11 @@ router.post("/register", validateRoleName, (req, res, next) => {
 
   // never save the plain text password in the db
   user.password = hash
+  user.role_name = req.role_name // get the role_name from the req
 
   Users.add(user)
-    .then(saved => {
-      res.status(201).json(user);
+    .then(result => {
+      res.status(201).json(result);
     })
     .catch(next); // our custom err handling middleware in server.js will trap this
 

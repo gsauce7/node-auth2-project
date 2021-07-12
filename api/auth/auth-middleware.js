@@ -1,4 +1,5 @@
 const { JWT_SECRET } = require("../secrets"); // use this secret!
+const jwt = require("jsonwebtoken");
 const { findBy } = require('../users/users-model');
 
 const restricted = (req, res, next) => {
@@ -20,11 +21,11 @@ const restricted = (req, res, next) => {
   const token = req.headers.authorization
 
   if (!token) {
-    res.status(401).json("Token required")
+    res.status(401).json({ message: "Token required" })
   } else {
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
       if (err) {
-        res.status(401).json("Token invalid" + err.message)
+        res.status(401).json({ message: "Token invalid" })
       } else {
         req.decodedToken = decoded
         next()
@@ -33,7 +34,7 @@ const restricted = (req, res, next) => {
   }
 }
 
-const only = (role_name) => (req, res, next) => {
+const only = role_name => (req, res, next) => {
   /*
     If the user does not provide a token in the Authorization header with a role_name
     inside its payload matching the role_name passed to this function as its argument:
@@ -44,10 +45,12 @@ const only = (role_name) => (req, res, next) => {
 
     Pull the decoded token from the req object, to avoid verifying it again!
   */
-  if (req.decodedToken.role === role_name) {
-    next()
+  const validToken = Boolean(req.decodedToken.role_name && req.decodedToken.role_name === role_name);
+
+  if (validToken) {
+    next();
   } else {
-    res.status(403).json({ message: `This is not for you` })
+    res.status(403).json({ message: `This is not for you` });
   }
 }
 
@@ -61,11 +64,15 @@ const checkUsernameExists = async (req, res, next) => {
     }
   */
   const { username } = req.body
-  const user = await findBy({ username })
-  if (!user) {
+  if (!username) {
     res.status(401).json({ message: `Invalid credentials` })
   } else {
-    next()
+    const user = await findBy({ username })
+    if (!user) {
+      res.status(401).json({ message: `Invalid credentials` })
+    } else {
+      next()
+    }
   }
 }
 
